@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     # Set true when served over HTTPS.
     cookie_secure: bool = False
     max_upload_bytes: int = 25 * 1024 * 1024
+    # First-run account, for hosts where there is no shell to run app.cli on.
+    # Only used while the database has no users at all.
+    bootstrap_email: str = ""
+    bootstrap_password: str = ""
+    bootstrap_name: str = "Orthodontist"
     # Built frontend (frontend/dist); served by FastAPI when present.
     frontend_dist: Path = BACKEND_DIR.parent / "frontend" / "dist"
 

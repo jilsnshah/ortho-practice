@@ -1,14 +1,22 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
+from app.bootstrap import ensure_bootstrap_user
 from app.config import get_settings
 from app.routers import appointments, auth, cases, clinics, dashboard, doctors, masters, patients, photos
 
-app = FastAPI(title="Ortho Practice", version="0.1.0")
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    ensure_bootstrap_user()
+    yield
+
+
+app = FastAPI(title="Ortho Practice", version="0.1.0", lifespan=lifespan)
 
 if get_settings().secret_key == "dev-insecure-change-me":
     logging.getLogger("uvicorn.error").warning(

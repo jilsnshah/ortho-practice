@@ -19,6 +19,31 @@ def _case(client, seed, **overrides):
     return res.json()
 
 
+def test_bootstrap_creates_only_the_first_account(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from app.bootstrap import ensure_bootstrap_user
+    from app.config import get_settings
+    from app.main import app
+
+    settings = get_settings()
+    monkeypatch.setattr(settings, "bootstrap_email", "first@example.com")
+    monkeypatch.setattr(settings, "bootstrap_password", "bootstrap-password")
+    monkeypatch.setattr(settings, "bootstrap_name", "Dr. First")
+
+    ensure_bootstrap_user()
+    client = TestClient(app)
+    login = {"email": "first@example.com", "password": "bootstrap-password"}
+    assert client.post("/api/auth/login", json=login).status_code == 200
+
+    # A second run must not add another account or reset the password.
+    client.post("/api/auth/password", json={"current_password": "bootstrap-password", "new_password": "changed-by-user"})
+    monkeypatch.setattr(settings, "bootstrap_email", "second@example.com")
+    ensure_bootstrap_user()
+    assert client.post("/api/auth/login", json=login).status_code == 401
+    assert client.post("/api/auth/login", json={"email": "second@example.com", "password": "bootstrap-password"}).status_code == 401
+
+
 def test_login_logout(client):
     assert client.get("/api/auth/me").json()["email"] == "ortho@example.com"
     client.post("/api/auth/logout")
