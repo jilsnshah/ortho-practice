@@ -1,6 +1,10 @@
 # Ortho Practice
 
-Mobile-first practice companion for an orthodontist consulting across several clinics (Stage 1 of the product plan): clinics and rate cards, a case ledger with auto-computed profit, an appointment agenda, progress photos with a presentation mode, and an earnings dashboard.
+Practice companion for an orthodontist consulting across several clinics (Stage 1 of the product plan): clinics and rate cards, a case ledger with auto-computed profit, an appointment agenda, progress photos with a presentation mode, and an earnings dashboard.
+
+The same app serves phone and laptop: below 960px it is a single column with a bottom tab bar; above that the tabs become a left sidebar and pages lay out in two columns (case details beside its appointments, month chart beside the breakdown, and so on).
+
+Live: <https://ortho-practice.onrender.com>
 
 - `backend/`: Python 3.12, FastAPI, SQLAlchemy 2, Alembic. SQLite by default; set `ORTHO_DATABASE_URL` for Postgres.
 - `frontend/`: React, TypeScript, Vite, TanStack Query.
@@ -29,7 +33,24 @@ Production-style, single process: run `npm run build` in `frontend/`. FastAPI th
 cd backend && ORTHO_SECRET_KEY=... ORTHO_COOKIE_SECURE=true uv run uvicorn app.main:app --host 0.0.0.0
 ```
 
-See `backend/.env.example` for all settings. Photos are stored under `ORTHO_UPLOAD_DIR` (default `backend/data/uploads`). Back up that directory together with the database.
+See `backend/.env.example` for all settings. Photos are stored in the database (table `photo_files`), so a database backup contains everything.
+
+## Deployment (Render)
+
+`Dockerfile` builds the frontend and serves it from FastAPI in one container; the container runs `alembic upgrade head` before starting, so a deploy migrates the database.
+
+What is running now, created with the Render CLI:
+
+| Resource | Details |
+|---|---|
+| Web service `ortho-practice` | Free plan, Singapore, Docker runtime, auto-deploys from `main`, health check `/api/health`. Free services sleep when idle, so the first request after a pause takes ~50s. |
+| Postgres `ortho-db` | **Free plan, which Render deletes 30 days after creation (17 October 2026), together with its data.** Move to a paid plan, or export, before then. |
+
+`render.yaml` describes the same setup as a Blueprint, for recreating it later.
+
+Environment variables on the service: `ORTHO_DATABASE_URL` (the database's internal connection string), `ORTHO_SECRET_KEY`, `ORTHO_COOKIE_SECURE=true`, and the one-time `ORTHO_BOOTSTRAP_*` trio.
+
+Accounts: there is no sign-up page. `ORTHO_BOOTSTRAP_EMAIL` / `ORTHO_BOOTSTRAP_PASSWORD` create the first account at startup, and only while the database has no users at all. After signing in, change the password under More, then delete those two variables from the service. Locally, use `app.cli create-user` instead.
 
 ## Tests
 
@@ -68,7 +89,9 @@ On a new case, picking the clinic and treatment fills quote, fee and material fr
 
 ## Known gaps
 
-- No rate limiting on login, and there is no password reset (use `app.cli set-password` on the server).
+- No rate limiting on login. Signed-in users can change their own password under More; there is no "forgot password" flow (use `app.cli set-password` where you can reach the database).
 - Appointment times are naive local time. That's fine for one practice timezone, but not for cross-timezone Stage 2.
 - There is no import from the existing Excel sheets yet.
 - HEIC photos rely on the phone converting them to JPEG on upload (iOS Safari does this).
+- Photos live in the database, which suits a personal practice but would need object storage at scale.
+- The GitHub repository is public; it holds no patient data or secrets, but keep it that way.
