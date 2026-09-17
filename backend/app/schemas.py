@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
 
 from app.naming import clean_display
+from app.security import MIN_PASSWORD_LENGTH
 
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
 OptText = Annotated[str | None, StringConstraints(strip_whitespace=True, max_length=5000)]
@@ -39,7 +40,7 @@ class LoginIn(BaseModel):
 
 class PasswordChangeIn(BaseModel):
     current_password: str
-    new_password: Annotated[str, StringConstraints(min_length=10, max_length=200)]
+    new_password: Annotated[str, StringConstraints(min_length=MIN_PASSWORD_LENGTH, max_length=200)]
 
 
 class UserOut(ORM):

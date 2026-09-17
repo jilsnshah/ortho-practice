@@ -109,11 +109,11 @@ function PasswordSheet({ onClose }: { onClose: () => void }) {
               type="password"
               autoComplete="new-password"
               required
-              minLength={10}
+              minLength={4}
               value={next}
               onChange={(e) => setNext(e.target.value)}
             />
-            <span className="hint">At least 10 characters.</span>
+            <span className="hint">At least 4 characters.</span>
           </div>
           <ErrorBox error={error} />
           <div className="form-actions">

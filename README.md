@@ -97,6 +97,7 @@ On a new case, picking the clinic and treatment fills quote, fee and material fr
 
 ## Known gaps
 
+- **The password minimum is 4 characters** (`MIN_PASSWORD_LENGTH` in `backend/app/security.py`), set at the owner's request. Combined with no login rate limiting and a public URL, a weak password here is the app's biggest exposure; raise both before anyone else gets an account.
 - No rate limiting on login. Signed-in users can change their own password under More; there is no "forgot password" flow (use `app.cli set-password` where you can reach the database).
 - Appointment times are naive local time. That's fine for one practice timezone, but not for cross-timezone Stage 2.
 - There is no import from the existing Excel sheets yet.

@@ -8,6 +8,11 @@ from app.config import get_settings
 
 SESSION_COOKIE = "ortho_session"
 
+# Deliberately low at the practice owner's request. It is weak for an app that is
+# reachable from the internet and holds patient records; raise it before the app
+# has more than its single owner account.
+MIN_PASSWORD_LENGTH = 4
+
 _SCRYPT_N, _SCRYPT_R, _SCRYPT_P = 2**14, 8, 1
 
 

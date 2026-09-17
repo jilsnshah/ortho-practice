@@ -55,6 +55,8 @@ def test_login_logout(client):
 def test_change_password(client):
     wrong = client.post("/api/auth/password", json={"current_password": "nope", "new_password": "another-long-pass"})
     assert wrong.status_code == 422
+    too_short = client.post("/api/auth/password", json={"current_password": PASSWORD, "new_password": "abc"})
+    assert too_short.status_code == 422
     ok = client.post("/api/auth/password", json={"current_password": PASSWORD, "new_password": "another-long-pass"})
     assert ok.status_code == 204
     client.post("/api/auth/logout")

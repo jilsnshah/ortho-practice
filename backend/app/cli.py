@@ -14,18 +14,18 @@ from sqlalchemy import func, select
 
 from app.db import SessionLocal
 from app.models import User
-from app.security import hash_password
+from app.security import MIN_PASSWORD_LENGTH, hash_password
 
 
 def _prompt_password(from_stdin: bool) -> str:
     if from_stdin:
         password = sys.stdin.readline().rstrip("\n")
-        if len(password) < 10:
-            sys.exit("Password must be at least 10 characters.")
+        if len(password) < MIN_PASSWORD_LENGTH:
+            sys.exit(f"Password must be at least {MIN_PASSWORD_LENGTH} characters.")
         return password
-    password = getpass.getpass("Password (min 10 chars): ")
-    if len(password) < 10:
-        sys.exit("Password must be at least 10 characters.")
+    password = getpass.getpass(f"Password (min {MIN_PASSWORD_LENGTH} chars): ")
+    if len(password) < MIN_PASSWORD_LENGTH:
+        sys.exit(f"Password must be at least {MIN_PASSWORD_LENGTH} characters.")
     if getpass.getpass("Repeat password: ") != password:
         sys.exit("Passwords do not match.")
     return password
