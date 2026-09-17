@@ -5,3 +5,8 @@ backend/.env
 __pycache__/
 frontend/node_modules/
 frontend/dist/
+
+# Patient data: never commit the practice ledger (this repo is public)
+*.xlsx
+*.xls
+*.csv

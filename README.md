@@ -67,6 +67,29 @@ cd backend && uv run pytest     # API, integrity rules, migration-vs-models chec
 cd frontend && npm run build && npm run lint
 ```
 
+## Importing the practice's Excel ledger
+
+`backend/scripts/import_sheet.py` reads the sheet (one tab per city, a bold row per clinic, patient rows beneath, and the clinic's hand-made subtotal) and loads it through the API, so the import obeys the same rules as typing it in.
+
+```sh
+cd backend
+uv run --group dev python scripts/import_sheet.py "Dr. Karishma Parikh.xlsx" --dry-run
+ORTHO_IMPORT_PASSWORD=... uv run --group dev python scripts/import_sheet.py "Dr. Karishma Parikh.xlsx" \
+    --base-url https://ortho-practice.onrender.com --email you@example.com
+```
+
+What it does with the sheet:
+
+- A clinic's rate card is the most common quote / fee / material triple per treatment in that clinic's block, so the repeated numbers become defaults and the one-off cases keep their own amounts.
+- Spelling variants ("Self - Ligating Metal Braces", "Self-Ligating Metal Braces", "self - Ligating...") collapse into one treatment type, because uniqueness is enforced on the normalized name.
+- A clinic named after its doctor ("Dr. Harsh Verma - Althan") also creates that doctor and links them to the clinic.
+- Rows with no treatment or no fee are kept as `consultation` cases, so they show up under "Missing details" instead of being lost.
+- The sheet has no dates, so every case starts on `--started-on` (today by default). Fix the dates you care about afterwards.
+- Every sheet row becomes its own patient. Two rows with the same name in one clinic are reported, not merged.
+- `--dry-run` prints the totals per clinic, the rows worth a second look, and any disagreement with the sheet's own subtotals.
+
+The workbook itself is not in this repository (`.gitignore` excludes spreadsheets) because it holds patient names.
+
 ## Data model rules
 
 Every real-world thing has its own table and integer id: `cities`, `clinics`, `doctors` (plus a `clinic_doctors` link table), `treatment_types`, `rate_card_entries`, `patients`, `cases`, `appointments`, `photos`. Relationships are foreign keys only; no table stores another record's name.
