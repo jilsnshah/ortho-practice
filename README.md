@@ -48,6 +48,14 @@ What is running now, created with the Render CLI:
 
 `render.yaml` describes the same setup as a Blueprint, for recreating it later.
 
+Deploying a change: push to `main`, then trigger the build.
+
+```sh
+render deploys create srv-dam350jm8hqs73be8btg --confirm
+```
+
+The service clones the public repository directly rather than through Render's GitHub App, so no webhook fires on a push and the build has to be asked for. Connecting the repository in the Render dashboard makes pushes deploy by themselves.
+
 Environment variables on the service: `ORTHO_DATABASE_URL` (the database's internal connection string), `ORTHO_SECRET_KEY`, `ORTHO_COOKIE_SECURE=true`, and the one-time `ORTHO_BOOTSTRAP_*` trio.
 
 Accounts: there is no sign-up page. `ORTHO_BOOTSTRAP_EMAIL` / `ORTHO_BOOTSTRAP_PASSWORD` create the first account at startup, and only while the database has no users at all. After signing in, change the password under More, then delete those two variables from the service. Locally, use `app.cli create-user` instead.
