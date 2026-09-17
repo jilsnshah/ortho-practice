@@ -1166,4 +1166,8 @@ a.list-item:active {
   .login .card {
     max-width: 420px;
   }
+
+  .quick-actions {
+    max-width: 520px;
+  }
 }

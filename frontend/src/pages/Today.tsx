@@ -28,7 +28,7 @@ export function TodayPage() {
     <Page title={formatDate(new Date(), { weekday: 'long', year: undefined })}>
       {firstName && <h2 style={{ fontSize: '1.3rem' }}>Hello, Dr. {firstName}</h2>}
 
-      <div className="grid-2">
+      <div className="grid-2 quick-actions">
         <Link to="/cases/new" className="btn primary">
           + New case
         </Link>
